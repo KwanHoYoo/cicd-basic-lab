@@ -69,14 +69,15 @@ jobs:
             ${{ vars.DOCKERHUB_USERNAME }}/cicd-basic-lab:latest
           # 빈칸 7: GitHub Actions 캐시를 Docker 레이어 캐시로 활용
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max # mode=max 중간 빌드 단계의 레이어까지 모두 저장, mode=min 최종 레이어만 저장
 
   cd:
     needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: 배포할 이미지 출력
-        run: echo "배포 이미지: ${{ needs.ci.outputs.image_tag }}"
+        run: |
+          echo "배포 이미지: ${{ needs.ci.outputs.image_tag }}"
 
       - name: SSH로 EC2에서 docker pull & run
         uses: appleboy/ssh-action@v1
