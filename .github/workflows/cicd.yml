@@ -14,12 +14,14 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    # outputs는 jobs.<job_id> 바로 아래에 위치해야 합니다.
+    outputs:
+      image_tag: ${{ steps.tag.outputs.value }}
+    
     defaults:
       run:
         working-directory: ./cicd-basic-lab
-    # 빈칸 1: cd Job에서 참조할 이미지 태그를 outputs로 노출
-    outputs:
-      image_tag: ${{ steps.tag.outputs.value }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,8 +40,9 @@ jobs:
 
       - name: 이미지 태그 생성
         id: tag
-        # 빈칸 2: {DOCKERHUB_USERNAME}/cicd-basic-lab:{run_number}-{sha 앞 7자리} 형식 생성
-        # 힌트: SHORT_SHA로 SHA 7자리 추출 → TAG 변수에 조합 → $GITHUB_OUTPUT에 저장
+        # working-directory가 설정되어 있으므로, 
+        # GITHUB_OUTPUT 파일 경로 인식을 위해 명시적으로 루트 지정 추천
+        working-directory: . 
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           TAG="${{ vars.DOCKERHUB_USERNAME }}/cicd-basic-lab:${{ github.run_number }}-$SHORT_SHA"
